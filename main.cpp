@@ -13,7 +13,7 @@ int main()
 
 	sf::Event event;
 
-    CoordinateSystem coordinateSystem = CoordinateSystem(500, 500, -10, 10, -10, 10);
+    CoordinateSystem coordinateSystem = CoordinateSystem(100, 100, -10, 10, -10, 10);
 
 	while (window.isOpen()) {
 		while (window.pollEvent(event)) {

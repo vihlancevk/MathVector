@@ -5,12 +5,13 @@
 
 class CoordinateSystem : public sf::Drawable, public sf::Transformable {
     private:
-        const float weight_ = 100, hight_ = 200;
+        const float weight_ = 800, hight_ = 800;
         float xCoordinate_, yCoordinate_;
-        int xMin_, xMax_;
-        int yMin_, yMax_;
+        float xMin_, xMax_;
+        float yMin_, yMax_;
+        float xCentre_, yCentre_;
     public:
-        CoordinateSystem(float xCoordinate, float yCoordinate, int xMin, int xMax, int yMin, int yMax);
+        CoordinateSystem(float xCoordinate, float yCoordinate, float xMin, float xMax, float yMin, float yMax);
     public:
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };
