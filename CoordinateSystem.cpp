@@ -13,7 +13,9 @@ CoordinateSystem::CoordinateSystem(float xCoordinate, float yCoordinate, float x
     yMin_(yMin),
     yMax_(yMax),
     xCentre_(CalculateCentreCoordinate(xCoordinate, weight_)),
-    yCentre_(CalculateCentreCoordinate(yCoordinate, hight_))
+    yCentre_(CalculateCentreCoordinate(yCoordinate, hight_)),
+    priceDividingScaleX_(weight_ / (xMax_ - xMin_)),
+    priceDividingScaleY_(hight_  / (yMax_ - yMin_))
     {}
 
 void CoordinateSystem::draw(sf::RenderTarget& target, sf::RenderStates states) const {
