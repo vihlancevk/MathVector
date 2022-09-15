@@ -1,4 +1,4 @@
-#include <iostream>
+// #include <iostream>
 #include <cmath>
 #include "Vector.hpp"
 
@@ -13,7 +13,7 @@ float Vector::CalculateVectorLen2() {
     return (x2_ - x1_)*(x2_ - x1_) + (y2_ - y1_)*(y2_ - y1_);
 }
 
-void Vector::RecalculateVectorInNewCoordinateSystem() {
+void Vector::RecalculateVector() {
     if (isBeginVectorChange_) {
         x1Real_ = CalculateRealVectorCoordinate(x1_);
         y1Real_ = CalculateRealVectorCoordinate(y1_, false);
@@ -32,20 +32,6 @@ void Vector::RecalculateVectorInNewCoordinateSystem() {
     }
 }
 
-void Vector::RotateVector() {
-    float x = x2_ - x1_;
-    float y = y2_ - y1_;
-    float cosF = cosf(angularVelocity_);
-    float sinF = sinf(angularVelocity_);
-
-    x2_ = x * cosF - y * sinF + x1_;
-    y2_ = x * sinF + y * cosF + y1_;
-
-    isEndVectorChange_ = true;
-
-    RecalculateVectorInNewCoordinateSystem();
-}
-
 Vector::Vector(CoordinateSystem& coordinateSystem, float x1, float y1, float x2, float y2):
     coordinateSystem_(coordinateSystem),
     x1_(x1),
@@ -59,6 +45,32 @@ Vector::Vector(CoordinateSystem& coordinateSystem, float x1, float y1, float x2,
     len2_(CalculateVectorLen2())
     {}
 
+void Vector::RotateVector() {
+    float x = x2_ - x1_;
+    float y = y2_ - y1_;
+    float cosF = cosf(angularVelocity_);
+    float sinF = sinf(angularVelocity_);
+
+    x2_ = x * cosF - y * sinF + x1_;
+    y2_ = x * sinF + y * cosF + y1_;
+
+    isEndVectorChange_ = true;
+
+    RecalculateVector();
+}
+
+void Vector::RecalculateVector(int x2Real, int y2Real) {
+    x2Real_ = (float) x2Real;
+    y2Real_ = (float) y2Real;
+
+    x2_ =  (x2Real_ - coordinateSystem_.xCentre_) / coordinateSystem_.priceDividingScaleX_;
+    y2_ = -(y2Real_ - coordinateSystem_.yCentre_) / coordinateSystem_.priceDividingScaleY_;
+
+    isLen2VectorChange = true;
+
+    RecalculateVector();
+}
+
 void Vector::CalculateTringleForVector(sf::ConvexShape& convex) const {
     const float heightTriangle = 20;
     const float halfSideTriangle = (heightTriangle) / 5;
@@ -69,8 +81,6 @@ void Vector::CalculateTringleForVector(sf::ConvexShape& convex) const {
     float x2Real = 0, y2Real = 0;
 
     if (fabs(y2Real_ - y1Real_) < precision) {
-        std::cout << "y = 0";
-
         if ((x2_ - x1_) >= 0) {
             x0Real = x1Real = x2Real = x2Real_ - heightTriangle;
         } else {

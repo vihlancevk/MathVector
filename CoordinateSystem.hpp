@@ -7,7 +7,7 @@ class CoordinateSystem : public sf::Drawable, public sf::Transformable {
     friend class Vector;
 
     private:
-        const float weight_ = 800, hight_ = 800;
+        const float weight_ = 1000, hight_ = 1000;
         float xCoordinate_, yCoordinate_;
         float xMin_, xMax_;
         float yMin_, yMax_;

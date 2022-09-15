@@ -29,10 +29,11 @@ class Vector : public sf::Drawable, public sf::Transformable {
         void CalculateTringleForVector(sf::ConvexShape& convex) const;
         float CalculateRealVectorCoordinate(float coordinate, bool isXCoordinate = true);
         float CalculateVectorLen2();
-        void RecalculateVectorInNewCoordinateSystem();
+        void RecalculateVector();
     public:
         Vector(CoordinateSystem& coordinateSystem, float x1, float y1, float x2, float y2);
         void RotateVector();
+        void RecalculateVector(int x2Real, int y2Real);
     public:
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };
