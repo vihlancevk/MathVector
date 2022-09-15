@@ -9,7 +9,7 @@ const float pi = 3.14f;
 class Vector : public sf::Drawable, public sf::Transformable {
     private: 
         CoordinateSystem& coordinateSystem_;
-        
+
         float x1_, y1_;
         bool isBeginVectorChange_ = false;
 
@@ -22,10 +22,11 @@ class Vector : public sf::Drawable, public sf::Transformable {
         float len2_;
         bool isLen2VectorChange = false;
         
-        float angularVelocity_ = 2*pi / 200;
+        float angularVelocity_ = 2*pi / 800;
     public:
         bool isRotateVector_ = false;
     private:
+        void CalculateTringleForVector(sf::ConvexShape& convex) const;
         float CalculateRealVectorCoordinate(float coordinate, bool isXCoordinate = true);
         float CalculateVectorLen2();
         void RecalculateVectorInNewCoordinateSystem();

@@ -59,6 +59,78 @@ Vector::Vector(CoordinateSystem& coordinateSystem, float x1, float y1, float x2,
     len2_(CalculateVectorLen2())
     {}
 
+void Vector::CalculateTringleForVector(sf::ConvexShape& convex) const {
+    const float heightTriangle = 20;
+    const float halfSideTriangle = (heightTriangle) / 5;
+    const float precision = 1e-6f;
+
+    float x0Real = 0, y0Real = 0;
+    float x1Real = 0, y1Real = 0;
+    float x2Real = 0, y2Real = 0;
+
+    if (fabs(y2Real_ - y1Real_) < precision) {
+        std::cout << "y = 0";
+
+        if ((x2_ - x1_) >= 0) {
+            x0Real = x1Real = x2Real = x2Real_ - heightTriangle;
+        } else {
+            x0Real = x1Real = x2Real = x2Real_ + heightTriangle;
+        }
+        
+        y1Real = y2Real_ - halfSideTriangle;
+        y2Real = y2Real_ + halfSideTriangle;
+    } else if (fabs(x2Real_ - x1Real_) < precision) {
+        if ((y2_ - y1_) >= 0) {
+            y0Real = y1Real = y2Real = y2Real_ + heightTriangle;
+        } else {
+            y0Real = y1Real = y2Real = y2Real_ - heightTriangle;
+        }
+
+        x1Real = x2Real_ - halfSideTriangle;
+        x2Real = x2Real_ + halfSideTriangle;
+    } else {
+        float tg1 = (y2Real_ - y1Real_) / (x2Real_ - x1Real_);
+        float tg1Squared = tg1 * tg1;
+        float cos1Squared = 1 / (1 + tg1Squared);
+        float sin1Squared = 1 - cos1Squared;
+
+        if ((x2_ - x1_) >= 0 && (y2_ - y1_) >= 0) {
+            x0Real = x2Real_ - heightTriangle * sqrtf(cos1Squared);
+            y0Real = y2Real_ + heightTriangle * sqrtf(sin1Squared);
+
+        } else if ((x2_ - x1_) <= 0 && (y2_ - y1_) > 0) {
+            x0Real = x2Real_ + heightTriangle * sqrtf(cos1Squared);
+            y0Real = y2Real_ + heightTriangle * sqrtf(sin1Squared);
+
+        } else if ((x2_ - x1_) < 0 && (y2_ - y1_) <= 0) {
+            x0Real = x2Real_ + heightTriangle * sqrtf(cos1Squared);
+            y0Real = y2Real_ - heightTriangle * sqrtf(sin1Squared);
+        } else {
+            x0Real = x2Real_ - heightTriangle * sqrtf(cos1Squared);
+            y0Real = y2Real_ - heightTriangle * sqrtf(sin1Squared);
+        }
+
+        float tg2 = -1 / tg1;
+        float b2 = y0Real - tg2 * x0Real;
+        float tg2Squared = tg2 * tg2;
+        float cos2Squared = 1 / (1 + tg2Squared);
+
+        x1Real = x0Real - halfSideTriangle * sqrtf(cos2Squared);
+        y1Real = tg2 * x1Real + b2;
+
+        x2Real = x0Real + halfSideTriangle * sqrtf(cos2Squared);;
+        y2Real = tg2 * x2Real + b2;
+    }
+
+    convex.setPointCount(3);
+
+    convex.setPoint(0, sf::Vector2f(x2Real_, y2Real_));
+    convex.setPoint(1, sf::Vector2f(x1Real, y1Real));
+    convex.setPoint(2, sf::Vector2f(x2Real, y2Real));
+
+    convex.setFillColor(sf::Color::Black);
+}
+
 void Vector::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     const float beginPointSize = 4;
     const float endPointSize = 8;
@@ -79,7 +151,10 @@ void Vector::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     endVectorPoint.setPosition(x2Real_ - endPointSize, y2Real_ - endPointSize);
     endVectorPoint.setFillColor(sf::Color::Black);
 
+    sf::ConvexShape convex;
+    CalculateTringleForVector(convex);
+
     target.draw(vector, 2, sf::Lines);
     target.draw(beginVectorPoint);
-    target.draw(endVectorPoint);
+    target.draw(convex);
 }

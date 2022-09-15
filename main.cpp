@@ -15,7 +15,7 @@ int main()
 	sf::Event event;
 
     CoordinateSystem coordinateSystem = CoordinateSystem(100, 100, -10, 10, -10, 10);
-    Vector vector = Vector(coordinateSystem, -1, -1, 5, 5);
+    Vector vector = Vector(coordinateSystem, -5, -9, -5, -6);
 
 	while (window.isOpen()) {
 		while (window.pollEvent(event)) {
