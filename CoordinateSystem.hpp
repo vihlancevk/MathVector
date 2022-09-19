@@ -3,20 +3,20 @@
 
 #include <SFML/Graphics.hpp>
 
-class CoordinateSystem : public sf::Drawable, public sf::Transformable {
-    friend class Vector;
-
-    private:
-        const float weight_ = 1000, hight_ = 1000;
-        float xCoordinate_, yCoordinate_;
+class CoordinateSystem {
+    public:
+        float weight_, hight_;
+        float xLeftUp_, yLeftUp_;
         float xMin_, xMax_;
         float yMin_, yMax_;
-        float xCentre_, yCentre_;
-        float priceDividingScaleX_, priceDividingScaleY_;
     public:
-        CoordinateSystem(float xCoordinate, float yCoordinate, float xMin, float xMax, float yMin, float yMax);
+        CoordinateSystem(float weight, float hight,
+                         float xLeftUp, float yLeftUp,
+                         float xMin, float xMax, float yMin, float yMax);
+        ~CoordinateSystem() {}
     public:
-        virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+        void ConvertLocalToGlobalVectorCoordinate(float xLocal, float yLocal, float& xGlobal, float& yGlobal) const;
+        void Draw(sf::RenderWindow& window) const;
 };
 
 #endif // COORDINATE_SYSTEM_HPP_
