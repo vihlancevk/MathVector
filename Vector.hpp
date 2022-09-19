@@ -18,6 +18,9 @@ class Vector {
 
         friend Vector  operator -  (const Vector& lhs, const Vector& rhs);
         friend Vector& operator -= (Vector& lhs, const Vector& rhs);
+        friend Vector& operator - (Vector& rhs);
+
+        friend bool operator == (const Vector& lhs, const Vector& rhs);
     public:
         float CalculateLen2Vector();
         void CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const;

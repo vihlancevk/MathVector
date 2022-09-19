@@ -10,6 +10,8 @@ Vector& operator += (Vector& lhs, const Vector& rhs) {
     lhs.x_ += rhs.x_;
     lhs.y_ += rhs.y_;
 
+    lhs.len2_ = lhs.CalculateLen2Vector();
+
     return lhs;
 }
 
@@ -22,7 +24,26 @@ Vector& operator -= (Vector& lhs, const Vector& rhs) {
     lhs.x_ -= rhs.x_;
     lhs.y_ -= rhs.y_;
 
+    lhs.len2_ = lhs.CalculateLen2Vector();
+
     return lhs;
+}
+
+Vector& operator - (Vector& rhs) {
+    rhs.x_ = -rhs.x_;
+    rhs.y_ = -rhs.y_;
+
+    return rhs;
+}
+
+bool operator == (const Vector& lhs, const Vector& rhs) {
+    const float precision = 1e-6f;
+
+    if (fabs(lhs.x_ - rhs.x_) > precision) return false;
+    if (fabs(lhs.y_ - rhs.y_) > precision) return false;
+    if (fabs(lhs.len2_ - rhs.len2_) > precision) return false;
+
+    return true;
 }
 
 float Vector::CalculateLen2Vector() {

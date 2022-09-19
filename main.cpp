@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "CoordinateSystem.hpp"
 #include "Vector.hpp"
+#include "UnitTests.hpp"
 
 const unsigned SCREEN_WEIGHT = 1920;
 const unsigned SCREEN_HIGHT = 1080;
@@ -13,6 +14,8 @@ void ResizeVector(Vector& vector, const CoordinateSystem& coordinateSystem, cons
 
 int main()
 {
+    UnitTests();
+
 	sf::RenderWindow window(sf::VideoMode(SCREEN_WEIGHT, SCREEN_HIGHT), SCREEN_TITLE);
 	window.setFramerateLimit(FRAME_RATE_LIMIT);
 
