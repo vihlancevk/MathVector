@@ -15,7 +15,6 @@ class CoordinateSystem : public sf::Drawable, public sf::Transformable {
         float priceDividingScaleX_, priceDividingScaleY_;
     public:
         CoordinateSystem(float xCoordinate, float yCoordinate, float xMin, float xMax, float yMin, float yMax);
-        void RotateVector();
     public:
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };

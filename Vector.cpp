@@ -1,74 +1,111 @@
-// #include <iostream>
+#include <iostream>
 #include <cmath>
 #include "Vector.hpp"
 
-float Vector::CalculateRealVectorCoordinate(float coordinate, bool isXCoordinate) {
-    if (isXCoordinate)
-        return coordinateSystem_.xCentre_ + coordinate * coordinateSystem_.priceDividingScaleX_;
+Vector operator + (const Vector& lhs, const Vector& rhs) {
+    // TODO: check that this vector int one system coordinat
+    Vector res = lhs;
+    return res += rhs;
+}
 
-    return coordinateSystem_.yCentre_ - coordinate * coordinateSystem_.priceDividingScaleY_;
+Vector& operator += (Vector& lhs, const Vector& rhs) {
+    // TODO: check that this vector int one system coordinat
+    lhs.Setx1Local(lhs.Getx1Local() + rhs.Getx1Local());
+    lhs.Sety1Local(lhs.Gety1Local() + rhs.Gety1Local());
+
+    lhs.Setx2Local(lhs.Getx2Local() + rhs.Getx2Local());
+    lhs.Sety2Local(lhs.Gety2Local() + rhs.Gety2Local());
+
+    lhs.RecalculateVector(true, true);
+
+    return lhs;
+}
+
+// Vector Vector::operator - (const Vector& vector) const {
+//     // TODO: check that this vector int one system coordinat
+//     return Vector(coordinateSystem_, x1Local_ - vector.Getx1Local(),
+//                                      y1Local_ - vector.Gety1Local(),
+//                                      x2Local_ - vector.Getx2Local(),
+//                                      y2Local_ - vector.Gety2Local());
+// }
+
+// void Vector::operator -= (const Vector& vector) {
+//     // TODO: check that this vector int one system coordinat
+//     x1Local_ -= vector.Getx1Local();
+//     y1Local_ -= vector.Gety1Local();
+
+//     x2Local_ -= vector.Getx2Local();
+//     y2Local_ -= vector.Gety2Local();
+
+//     RecalculateVector(true, true);
+// }
+
+float Vector::ConvertLocalToGlobalVectorCoordinate(float localCoordinate, bool isXCoordinate) {
+    if (isXCoordinate)
+        return coordinateSystem_.xCentre_ + localCoordinate * coordinateSystem_.priceDividingScaleX_;
+
+    return coordinateSystem_.yCentre_ - localCoordinate * coordinateSystem_.priceDividingScaleY_;
 }
 
 float Vector::CalculateVectorLen2() {
-    return (x2_ - x1_)*(x2_ - x1_) + (y2_ - y1_)*(y2_ - y1_);
+    return (x2Local_ - x1Local_)*(x2Local_ - x1Local_) + (y2Local_ - y1Local_)*(y2Local_ - y1Local_);
 }
 
-void Vector::RecalculateVector() {
-    if (isBeginVectorChange_) {
-        x1Real_ = CalculateRealVectorCoordinate(x1_);
-        y1Real_ = CalculateRealVectorCoordinate(y1_, false);
-        isBeginVectorChange_ = false;
-    }
-
-    if (isEndVectorChange_) {
-        x2Real_ = CalculateRealVectorCoordinate(x2_);
-        y2Real_ = CalculateRealVectorCoordinate(y2_, false);
-        isEndVectorChange_ = false;
-    }
-
-    if (isLen2VectorChange) {
-        isLen2VectorChange = false;
-        len2_ = (x2_ - x1_)*(x2_ - x1_) + (y2_ - y1_)*(y2_ - y1_);
-    }
-}
-
-Vector::Vector(CoordinateSystem& coordinateSystem, float x1, float y1, float x2, float y2):
+Vector::Vector(CoordinateSystem& coordinateSystem, float x1Local, float y1Local, float x2Local, float y2Local):
     coordinateSystem_(coordinateSystem),
-    x1_(x1),
-    y1_(y1),
-    x2_(x2),
-    y2_(y2),
-    x1Real_(CalculateRealVectorCoordinate(x1_)),
-    y1Real_(CalculateRealVectorCoordinate(y1_, false)),
-    x2Real_(CalculateRealVectorCoordinate(x2_)),
-    y2Real_(CalculateRealVectorCoordinate(y2_, false)),
+    x1Local_(x1Local),
+    y1Local_(y1Local),
+    x2Local_(x2Local),
+    y2Local_(y2Local),
+    x1Global_(ConvertLocalToGlobalVectorCoordinate(x1Local_)),
+    y1Global_(ConvertLocalToGlobalVectorCoordinate(y1Local_, false)),
+    x2Global_(ConvertLocalToGlobalVectorCoordinate(x2Local_)),
+    y2Global_(ConvertLocalToGlobalVectorCoordinate(y2Local_, false)),
     len2_(CalculateVectorLen2())
     {}
 
-void Vector::RotateVector() {
-    float x = x2_ - x1_;
-    float y = y2_ - y1_;
-    float cosF = cosf(angularVelocity_);
-    float sinF = sinf(angularVelocity_);
+void Vector::RecalculateVector(bool isBeginVectorChange, bool isEndVectorChange, bool isLen2VectorChange) {
+    if (isBeginVectorChange) {
+        x1Global_ = ConvertLocalToGlobalVectorCoordinate(x1Local_);
+        y1Global_ = ConvertLocalToGlobalVectorCoordinate(y1Local_, false);
+    }
 
-    x2_ = x * cosF - y * sinF + x1_;
-    y2_ = x * sinF + y * cosF + y1_;
+    if (isEndVectorChange) {
+        x2Global_ = ConvertLocalToGlobalVectorCoordinate(x2Local_);
+        y2Global_ = ConvertLocalToGlobalVectorCoordinate(y2Local_, false);
+    }
 
-    isEndVectorChange_ = true;
-
-    RecalculateVector();
+    if (isLen2VectorChange) {
+        len2_ = CalculateVectorLen2();
+    }
 }
 
-void Vector::RecalculateVector(int x2Real, int y2Real) {
-    x2Real_ = (float) x2Real;
-    y2Real_ = (float) y2Real;
+void Vector::RotateVector(bool isRotateVector) {
+    isRotateVector_ = isRotateVector;
+}
 
-    x2_ =  (x2Real_ - coordinateSystem_.xCentre_) / coordinateSystem_.priceDividingScaleX_;
-    y2_ = -(y2Real_ - coordinateSystem_.yCentre_) / coordinateSystem_.priceDividingScaleY_;
+void Vector::RotateVector() {
+    if (isRotateVector_) {
+        float x = x2Local_ - x1Local_;
+        float y = y2Local_ - y1Local_;
+        float cosF = cosf(angularVelocity_);
+        float sinF = sinf(angularVelocity_);
 
-    isLen2VectorChange = true;
+        x2Local_ = x * cosF - y * sinF + x1Local_;
+        y2Local_ = x * sinF + y * cosF + y1Local_;
 
-    RecalculateVector();
+        RecalculateVector(false, true);
+    }
+}
+
+void Vector::ConvertGlobalToLocalVectorCoordinates(int x2Global, int y2Global) {
+    x2Global_ = (float) x2Global;
+    y2Global_ = (float) y2Global;
+
+    x2Local_ =  (x2Global_ - coordinateSystem_.xCentre_) / coordinateSystem_.priceDividingScaleX_;
+    y2Local_ = -(y2Global_ - coordinateSystem_.yCentre_) / coordinateSystem_.priceDividingScaleY_;
+
+    RecalculateVector(false, false, true);
 }
 
 void Vector::CalculateTringleForVector(sf::ConvexShape& convex) const {
@@ -76,67 +113,67 @@ void Vector::CalculateTringleForVector(sf::ConvexShape& convex) const {
     const float halfSideTriangle = (heightTriangle) / 5;
     const float precision = 1e-6f;
 
-    float x0Real = 0, y0Real = 0;
-    float x1Real = 0, y1Real = 0;
-    float x2Real = 0, y2Real = 0;
+    float x0Global = 0, y0Global = 0;
+    float x1Global = 0, y1Global = 0;
+    float x2Global = 0, y2Global = 0;
 
-    if (fabs(y2Real_ - y1Real_) < precision) {
-        if ((x2_ - x1_) >= 0) {
-            x0Real = x1Real = x2Real = x2Real_ - heightTriangle;
+    if (fabs(y2Global_ - y1Global_) < precision) {
+        if ((x2Local_ - x1Local_) >= 0) {
+            x0Global = x1Global = x2Global = x2Global_ - heightTriangle;
         } else {
-            x0Real = x1Real = x2Real = x2Real_ + heightTriangle;
+            x0Global = x1Global = x2Global = x2Global_ + heightTriangle;
         }
         
-        y1Real = y2Real_ - halfSideTriangle;
-        y2Real = y2Real_ + halfSideTriangle;
-    } else if (fabs(x2Real_ - x1Real_) < precision) {
-        if ((y2_ - y1_) >= 0) {
-            y0Real = y1Real = y2Real = y2Real_ + heightTriangle;
+        y1Global = y2Global_ - halfSideTriangle;
+        y2Global = y2Global_ + halfSideTriangle;
+    } else if (fabs(x2Global_ - x1Global_) < precision) {
+        if ((y2Local_ - y1Local_) >= 0) {
+            y0Global = y1Global = y2Global = y2Global_ + heightTriangle;
         } else {
-            y0Real = y1Real = y2Real = y2Real_ - heightTriangle;
+            y0Global = y1Global = y2Global = y2Global_ - heightTriangle;
         }
 
-        x1Real = x2Real_ - halfSideTriangle;
-        x2Real = x2Real_ + halfSideTriangle;
+        x1Global = x2Global_ - halfSideTriangle;
+        x2Global = x2Global_ + halfSideTriangle;
     } else {
-        float tg1 = (y2Real_ - y1Real_) / (x2Real_ - x1Real_);
+        float tg1 = (y2Global_ - y1Global_) / (x2Global_ - x1Global_);
         float tg1Squared = tg1 * tg1;
         float cos1Squared = 1 / (1 + tg1Squared);
         float sin1Squared = 1 - cos1Squared;
 
-        if ((x2_ - x1_) >= 0 && (y2_ - y1_) >= 0) {
-            x0Real = x2Real_ - heightTriangle * sqrtf(cos1Squared);
-            y0Real = y2Real_ + heightTriangle * sqrtf(sin1Squared);
+        if ((x2Local_ - x1Local_) >= 0 && (y2Local_ - y1Local_) >= 0) {
+            x0Global = x2Global_ - heightTriangle * sqrtf(cos1Squared);
+            y0Global = y2Global_ + heightTriangle * sqrtf(sin1Squared);
 
-        } else if ((x2_ - x1_) <= 0 && (y2_ - y1_) > 0) {
-            x0Real = x2Real_ + heightTriangle * sqrtf(cos1Squared);
-            y0Real = y2Real_ + heightTriangle * sqrtf(sin1Squared);
+        } else if ((x2Local_ - x1Local_) <= 0 && (y2Local_ - y1Local_) > 0) {
+            x0Global = x2Global_ + heightTriangle * sqrtf(cos1Squared);
+            y0Global = y2Global_ + heightTriangle * sqrtf(sin1Squared);
 
-        } else if ((x2_ - x1_) < 0 && (y2_ - y1_) <= 0) {
-            x0Real = x2Real_ + heightTriangle * sqrtf(cos1Squared);
-            y0Real = y2Real_ - heightTriangle * sqrtf(sin1Squared);
+        } else if ((x2Local_ - x1Local_) < 0 && (y2Local_ - y1Local_) <= 0) {
+            x0Global = x2Global_ + heightTriangle * sqrtf(cos1Squared);
+            y0Global = y2Global_ - heightTriangle * sqrtf(sin1Squared);
         } else {
-            x0Real = x2Real_ - heightTriangle * sqrtf(cos1Squared);
-            y0Real = y2Real_ - heightTriangle * sqrtf(sin1Squared);
+            x0Global = x2Global_ - heightTriangle * sqrtf(cos1Squared);
+            y0Global = y2Global_ - heightTriangle * sqrtf(sin1Squared);
         }
 
         float tg2 = -1 / tg1;
-        float b2 = y0Real - tg2 * x0Real;
+        float b2 = y0Global - tg2 * x0Global;
         float tg2Squared = tg2 * tg2;
         float cos2Squared = 1 / (1 + tg2Squared);
 
-        x1Real = x0Real - halfSideTriangle * sqrtf(cos2Squared);
-        y1Real = tg2 * x1Real + b2;
+        x1Global = x0Global - halfSideTriangle * sqrtf(cos2Squared);
+        y1Global = tg2 * x1Global + b2;
 
-        x2Real = x0Real + halfSideTriangle * sqrtf(cos2Squared);;
-        y2Real = tg2 * x2Real + b2;
+        x2Global = x0Global + halfSideTriangle * sqrtf(cos2Squared);;
+        y2Global = tg2 * x2Global + b2;
     }
 
     convex.setPointCount(3);
 
-    convex.setPoint(0, sf::Vector2f(x2Real_, y2Real_));
-    convex.setPoint(1, sf::Vector2f(x1Real, y1Real));
-    convex.setPoint(2, sf::Vector2f(x2Real, y2Real));
+    convex.setPoint(0, sf::Vector2f(x2Global_, y2Global_));
+    convex.setPoint(1, sf::Vector2f(x1Global, y1Global));
+    convex.setPoint(2, sf::Vector2f(x2Global, y2Global));
 
     convex.setFillColor(sf::Color::Black);
 }
@@ -149,16 +186,16 @@ void Vector::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
     sf::Vertex vector[] =
     {
-        sf::Vertex(sf::Vector2f(x1Real_, y1Real_), sf::Color::Black),
-        sf::Vertex(sf::Vector2f(x2Real_, y2Real_), sf::Color::Black)
+        sf::Vertex(sf::Vector2f(x1Global_, y1Global_), sf::Color::Black),
+        sf::Vertex(sf::Vector2f(x2Global_, y2Global_), sf::Color::Black)
     };
 
     sf::CircleShape beginVectorPoint(beginPointSize);
-    beginVectorPoint.setPosition(x1Real_ - beginPointSize, y1Real_ - beginPointSize);
+    beginVectorPoint.setPosition(x1Global_ - beginPointSize, y1Global_ - beginPointSize);
     beginVectorPoint.setFillColor(sf::Color::Black);
 
     sf::CircleShape endVectorPoint(endPointSize);
-    endVectorPoint.setPosition(x2Real_ - endPointSize, y2Real_ - endPointSize);
+    endVectorPoint.setPosition(x2Global_ - endPointSize, y2Global_ - endPointSize);
     endVectorPoint.setFillColor(sf::Color::Black);
 
     sf::ConvexShape convex;

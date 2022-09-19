@@ -1,4 +1,4 @@
-// #include <iostream>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "CoordinateSystem.hpp"
 #include "Vector.hpp"
@@ -15,8 +15,10 @@ int main()
 
 	sf::Event event;
 
-    CoordinateSystem coordinateSystem = CoordinateSystem(460, 0, -100, 100, -100, 100);
-    Vector vector = Vector(coordinateSystem, -23, -17, 21, 53);
+    CoordinateSystem coordinateSystem = CoordinateSystem(460, 0, -10, 10, -10, 10);
+    Vector vector = Vector(coordinateSystem, 0, 0, 1, 1);
+    Vector vector1 = Vector(coordinateSystem, 0, 0, 5, 5);
+    vector += vector1;
 
 	while (window.isOpen()) {
 		while (window.pollEvent(event)) {
@@ -30,22 +32,21 @@ int main()
                     window.close();
 
                 if (event.key.code == sf::Keyboard::W)
-                    vector.isRotateVector_ = true;
+                    vector.RotateVector(true);
 
                 if (event.key.code == sf::Keyboard::S)
-                    vector.isRotateVector_ = false;
+                    vector.RotateVector(false);
 			}
 
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-                    vector.RecalculateVector(localPosition.x, localPosition.y);
+                    vector.ConvertGlobalToLocalVectorCoordinates(localPosition.x, localPosition.y);
                 }
             }
 		}
 
-        if (vector.isRotateVector_)
-            vector.RotateVector();
+        vector.RotateVector();
 
 		window.clear();
         window.draw(coordinateSystem);

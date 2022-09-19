@@ -10,30 +10,46 @@ class Vector : public sf::Drawable, public sf::Transformable {
     private: 
         CoordinateSystem& coordinateSystem_;
 
-        float x1_, y1_;
-        bool isBeginVectorChange_ = false;
+        float x1Local_, y1Local_;
 
-        float x2_, y2_;
-        bool isEndVectorChange_ = false;
+        float x2Local_, y2Local_;
         
-        float x1Real_, y1Real_;
-        float x2Real_, y2Real_;
+        float x1Global_, y1Global_;
+        float x2Global_, y2Global_;
         
         float len2_;
-        bool isLen2VectorChange = false;
         
-        float angularVelocity_ = 2*pi / 800;
-    public:
+        const float angularVelocity_ = 2*pi / 800;
         bool isRotateVector_ = false;
     private:
         void CalculateTringleForVector(sf::ConvexShape& convex) const;
-        float CalculateRealVectorCoordinate(float coordinate, bool isXCoordinate = true);
+        float ConvertLocalToGlobalVectorCoordinate(float localCoordinate, bool isXCoordinate = true);
         float CalculateVectorLen2();
-        void RecalculateVector();
     public:
-        Vector(CoordinateSystem& coordinateSystem, float x1, float y1, float x2, float y2);
-        void RotateVector();
-        void RecalculateVector(int x2Real, int y2Real);
+        CoordinateSystem& GetCoordinateSystem() const { return coordinateSystem_; }
+        
+        float Getx1Local() const { return x1Local_; }
+        void  Setx1Local(float x1Local) { x1Local_ = x1Local; }
+
+        float Gety1Local() const { return y1Local_; }
+        void  Sety1Local(float y1Local) { y1Local_ = y1Local; }
+        
+        float Getx2Local() const { return x2Local_; }
+        void  Setx2Local(float x2Local) { x2Local_ = x2Local; }
+        
+        float Gety2Local() const { return y2Local_; }
+        void  Sety2Local(float y2Local) { y2Local_ = y2Local; }
+
+        Vector(CoordinateSystem& coordinateSystem, float x1Local, float y1Local, float x2Local, float y2Local);
+        void RotateVector(bool isRotateVector);
+        void RotateVector();        
+        void ConvertGlobalToLocalVectorCoordinates(int x2Global, int y2Global);
+        void RecalculateVector(bool isBeginVectorChange = false,
+                               bool isEndVectorChange   = false,
+                               bool isLen2VectorChange  = false);
+
+        friend Vector  operator +  (const Vector& lhs, const Vector& rhs);
+        friend Vector& operator += (Vector& lhs, const Vector& rhs);
     public:
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };
