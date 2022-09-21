@@ -13,14 +13,20 @@ class Vector {
         Vector(float x, float y): x_(x), y_(y), len2_(CalculateLen2Vector()) {}
         ~Vector() {}
     public:
+        friend bool operator == (const Vector& lhs, const Vector& rhs);
+
         friend Vector  operator +  (const Vector& lhs, const Vector& rhs);
         friend Vector& operator += (Vector& lhs, const Vector& rhs);
 
         friend Vector  operator -  (const Vector& lhs, const Vector& rhs);
         friend Vector& operator -= (Vector& lhs, const Vector& rhs);
-        friend Vector& operator - (Vector& rhs);
+        friend Vector& operator -  (Vector& rhs);
 
-        friend bool operator == (const Vector& lhs, const Vector& rhs);
+        friend Vector  operator *  (const float multiplier, const Vector& lhs);
+        friend Vector  operator *  (const Vector& lhs, const float multiplier);
+        friend Vector& operator *= (Vector& lhs, const float rhs);
+
+        friend float operator * (const Vector& lhs, const Vector& rhs);
     public:
         float CalculateLen2Vector();
         void CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const;

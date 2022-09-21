@@ -1,6 +1,16 @@
 #include <cmath>
 #include "Vector.hpp"
 
+bool operator == (const Vector& lhs, const Vector& rhs) {
+    const float precision = 1e-6f;
+
+    if (fabs(lhs.x_ - rhs.x_) > precision) return false;
+    if (fabs(lhs.y_ - rhs.y_) > precision) return false;
+    if (fabs(lhs.len2_ - rhs.len2_) > precision) return false;
+
+    return true;
+}
+
 Vector operator + (const Vector& lhs, const Vector& rhs) {
     Vector res = lhs;
     return res += rhs;
@@ -36,14 +46,27 @@ Vector& operator - (Vector& rhs) {
     return rhs;
 }
 
-bool operator == (const Vector& lhs, const Vector& rhs) {
-    const float precision = 1e-6f;
+Vector  operator * (const float multiplier, const Vector& rhs) {
+    Vector res = rhs;
+    return res *= multiplier;
+}
 
-    if (fabs(lhs.x_ - rhs.x_) > precision) return false;
-    if (fabs(lhs.y_ - rhs.y_) > precision) return false;
-    if (fabs(lhs.len2_ - rhs.len2_) > precision) return false;
+Vector  operator * (const Vector& lhs, const float multiplier) {
+    Vector res = lhs;
+    return res *= multiplier;
+}
 
-    return true;
+Vector& operator *= (Vector& lhs, const float rhs) {
+    lhs.x_ *= rhs;
+    lhs.y_ *= rhs;
+
+    lhs.len2_ = lhs.CalculateLen2Vector();
+
+    return lhs;
+}
+
+float operator * (const Vector& lhs, const Vector& rhs) {
+    return lhs.x_ * rhs.x_ + lhs.y_ * rhs.y_;
 }
 
 float Vector::CalculateLen2Vector() {
