@@ -6,11 +6,12 @@
 
 class Vector {
     public: 
-        float x_, y_;
+        float x_, y_, z_;
         float len2_;
         
     public:
-        Vector(float x, float y): x_(x), y_(y), len2_(CalculateLen2Vector()) {}
+        Vector(float x, float y)         : x_(x), y_(y), z_(0), len2_(CalculateLen2Vector()) {}
+        Vector(float x, float y, float z): x_(x), y_(y), z_(z), len2_(CalculateLen2Vector()) {}
         ~Vector() {}
     public:
         friend bool operator == (const Vector& lhs, const Vector& rhs);
@@ -27,9 +28,13 @@ class Vector {
         friend Vector& operator *= (Vector& lhs, const float rhs);
 
         friend float operator * (const Vector& lhs, const Vector& rhs);
-    public:
+    private:
         float CalculateLen2Vector();
-        void CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const;
+
+        void  CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const;
+    public:
+        void RotateVector(const float angle);
+        void ResizeVector(const CoordinateSystem& coordinateSystem, const int xGlobal, const int yGlobal);
         void Draw(sf::RenderWindow& window, CoordinateSystem& coordinateSystem) const;
 };
 

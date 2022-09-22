@@ -6,6 +6,7 @@ bool operator == (const Vector& lhs, const Vector& rhs) {
 
     if (fabs(lhs.x_ - rhs.x_) > precision) return false;
     if (fabs(lhs.y_ - rhs.y_) > precision) return false;
+    if (fabs(lhs.z_ - rhs.z_) > precision) return false;
     if (fabs(lhs.len2_ - rhs.len2_) > precision) return false;
 
     return true;
@@ -19,6 +20,7 @@ Vector operator + (const Vector& lhs, const Vector& rhs) {
 Vector& operator += (Vector& lhs, const Vector& rhs) {
     lhs.x_ += rhs.x_;
     lhs.y_ += rhs.y_;
+    lhs.z_ += rhs.z_;
 
     lhs.len2_ = lhs.CalculateLen2Vector();
 
@@ -33,6 +35,7 @@ Vector operator - (const Vector& lhs, const Vector& rhs) {
 Vector& operator -= (Vector& lhs, const Vector& rhs) {
     lhs.x_ -= rhs.x_;
     lhs.y_ -= rhs.y_;
+    lhs.z_ -= rhs.z_;
 
     lhs.len2_ = lhs.CalculateLen2Vector();
 
@@ -42,6 +45,7 @@ Vector& operator -= (Vector& lhs, const Vector& rhs) {
 Vector& operator - (Vector& rhs) {
     rhs.x_ = -rhs.x_;
     rhs.y_ = -rhs.y_;
+    rhs.z_ = -rhs.z_;
 
     return rhs;
 }
@@ -59,6 +63,7 @@ Vector  operator * (const Vector& lhs, const float multiplier) {
 Vector& operator *= (Vector& lhs, const float rhs) {
     lhs.x_ *= rhs;
     lhs.y_ *= rhs;
+    lhs.z_ *= rhs;
 
     lhs.len2_ = lhs.CalculateLen2Vector();
 
@@ -66,11 +71,41 @@ Vector& operator *= (Vector& lhs, const float rhs) {
 }
 
 float operator * (const Vector& lhs, const Vector& rhs) {
-    return lhs.x_ * rhs.x_ + lhs.y_ * rhs.y_;
+    return lhs.x_ * rhs.x_ + lhs.y_ * rhs.y_ + lhs.z_ * rhs.z_;
 }
 
 float Vector::CalculateLen2Vector() {
-    return x_ * x_ + y_ * y_;
+    return x_ * x_ + y_ * y_ + z_ * z_;
+}
+
+void Vector::RotateVector(const float angle) {
+    float x = x_;
+    float y = y_;
+    float cosF = cosf(angle);
+    float sinF = sinf(angle);
+
+    x_ = x * cosF - y * sinF;
+    y_ = x * sinF + y * cosF;
+
+    len2_ = CalculateLen2Vector();
+}
+
+void Vector::ResizeVector(const CoordinateSystem& coordinateSystem, const int xGlobal, const int yGlobal) {
+    float xCentre = coordinateSystem.xLeftUp_ + coordinateSystem.weight_ / 2;
+    float yCentre = coordinateSystem.yLeftUp_ + coordinateSystem.hight_  / 2;
+
+    float priceDividingScaleX = coordinateSystem.weight_ / (coordinateSystem.xMax_ - coordinateSystem.xMin_);
+    float priceDividingScaleY = coordinateSystem.hight_  / (coordinateSystem.yMax_ - coordinateSystem.yMin_);
+
+    x_ =  ((float) xGlobal - xCentre) / priceDividingScaleX;
+    y_ = -((float) yGlobal - yCentre) / priceDividingScaleY;
+
+    if (x_ < coordinateSystem.xMin_) { x_ = coordinateSystem.xMin_; }
+    if (x_ > coordinateSystem.xMax_) { x_ = coordinateSystem.xMax_; }
+    if (y_ < coordinateSystem.yMin_) { y_ = coordinateSystem.yMin_; }
+    if (y_ > coordinateSystem.yMax_) { y_ = coordinateSystem.yMax_; }
+
+    len2_ = CalculateLen2Vector();
 }
 
 void Vector::CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const {

@@ -9,8 +9,7 @@ const unsigned SCREEN_HIGHT = 1080;
 const char *SCREEN_TITLE = "Vectors";
 const unsigned FRAME_RATE_LIMIT = 60;
 
-void RotateVector(Vector& vector);
-void ResizeVector(Vector& vector, const CoordinateSystem& coordinateSystem, const int xGlobal, const int yGlobal);
+const float PI = 3.14159f;
 
 int main()
 {
@@ -22,7 +21,7 @@ int main()
 	sf::Event event;
 
     CoordinateSystem coordinateSystem1 = CoordinateSystem(800, 800, 100, 100, -10, 10, -10, 10);
-    Vector vector1 = Vector(5, 5);
+    Vector vector1 = Vector(6, 6);
 
     CoordinateSystem coordinateSystem2 = CoordinateSystem(800, 800, 1000, 100, -10, 10, -10, 10);
     Vector vector2 = Vector(10, 10);
@@ -49,13 +48,13 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-                    ResizeVector(vector2, coordinateSystem2, localPosition.x, localPosition.y);
+                    vector2.ResizeVector(coordinateSystem2, localPosition.x, localPosition.y);
                 }
             }
 		}
 
         if (isRotateVector) {
-            RotateVector(vector1);
+            vector1.RotateVector(PI / 400);
         }
 
         coordinateSystem1.Draw(window);
@@ -69,36 +68,4 @@ int main()
 	}
 
 	return 0;
-}
-
-void RotateVector(Vector& vector) {
-    const float angularVelocity = 2 * 3.14f / 800;
-
-    float x = vector.x_;
-    float y = vector.y_;
-    float cosF = cosf(angularVelocity);
-    float sinF = sinf(angularVelocity);
-
-    vector.x_ = x * cosF - y * sinF;
-    vector.y_ = x * sinF + y * cosF;
-
-    vector.len2_ = vector.CalculateLen2Vector();
-}
-
-void ResizeVector(Vector& vector, const CoordinateSystem& coordinateSystem, const int xGlobal, const int yGlobal) {
-    float xCentre = coordinateSystem.xLeftUp_ + coordinateSystem.weight_ / 2;
-    float yCentre = coordinateSystem.yLeftUp_ + coordinateSystem.hight_  / 2;
-
-    float priceDividingScaleX = coordinateSystem.weight_ / (coordinateSystem.xMax_ - coordinateSystem.xMin_);
-    float priceDividingScaleY = coordinateSystem.hight_  / (coordinateSystem.yMax_ - coordinateSystem.yMin_);
-
-    vector.x_ =  ((float) xGlobal - xCentre) / priceDividingScaleX;
-    vector.y_ = -((float) yGlobal - yCentre) / priceDividingScaleY;
-
-    if (vector.x_ < coordinateSystem.xMin_) { vector.x_ = coordinateSystem.xMin_; }
-    if (vector.x_ > coordinateSystem.xMax_) { vector.x_ = coordinateSystem.xMax_; }
-    if (vector.y_ < coordinateSystem.yMin_) { vector.y_ = coordinateSystem.yMin_; }
-    if (vector.y_ > coordinateSystem.yMax_) { vector.y_ = coordinateSystem.yMax_; }
-
-    vector.len2_ = vector.CalculateLen2Vector();
 }
