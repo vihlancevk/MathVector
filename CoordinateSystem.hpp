@@ -15,8 +15,8 @@ class CoordinateSystem {
                          float xMin, float xMax, float yMin, float yMax);
         ~CoordinateSystem() {}
     public:
-        void ConvertLocalToGlobalVectorCoordinate(float xLocal, float yLocal, float& xGlobal, float& yGlobal) const;
-        void Draw(sf::RenderWindow& window) const;
+        void convertLocalToGlobalVectorCoordinate(float xLocal, float yLocal, float& xGlobal, float& yGlobal) const;
+        void draw(sf::RenderWindow& window) const;
 };
 
 #endif // COORDINATE_SYSTEM_HPP_

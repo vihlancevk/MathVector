@@ -1,7 +1,6 @@
-#include <cmath>
 #include <SFML/Graphics.hpp>
 #include "CoordinateSystem.hpp"
-#include "Vector.hpp"
+#include "MathVector.hpp"
 #include "UnitTests.hpp"
 
 const unsigned SCREEN_WEIGHT = 1920;
@@ -48,20 +47,20 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-                    vector2.ResizeVector(coordinateSystem2, localPosition.x, localPosition.y);
+                    vector2.resizeVector(coordinateSystem2, localPosition.x, localPosition.y);
                 }
             }
 		}
 
         if (isRotateVector) {
-            vector1.RotateVector(PI / 400);
+            vector1.rotateVector(PI / 400);
         }
 
-        coordinateSystem1.Draw(window);
-        vector1.Draw(window, coordinateSystem1);
+        coordinateSystem1.draw(window);
+        vector1.draw(window, coordinateSystem1);
 
-        coordinateSystem2.Draw(window);
-        vector2.Draw(window, coordinateSystem2);
+        coordinateSystem2.draw(window);
+        vector2.draw(window, coordinateSystem2);
 
         window.display();
 		window.clear();

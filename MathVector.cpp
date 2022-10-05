@@ -1,13 +1,12 @@
-#include <cmath>
-#include "Vector.hpp"
+#include "MathVector.hpp"
 
-bool operator == (const Vector& lhs, const Vector& rhs) {
+bool operator == (Vector& lhs, Vector& rhs) {
     const float precision = 1e-6f;
 
     if (fabs(lhs.x_ - rhs.x_) > precision) return false;
     if (fabs(lhs.y_ - rhs.y_) > precision) return false;
     if (fabs(lhs.z_ - rhs.z_) > precision) return false;
-    if (fabs(lhs.len2_ - rhs.len2_) > precision) return false;
+    if (fabs(lhs.getVectorLen() - rhs.getVectorLen()) > precision) return false;
 
     return true;
 }
@@ -22,7 +21,7 @@ Vector& operator += (Vector& lhs, const Vector& rhs) {
     lhs.y_ += rhs.y_;
     lhs.z_ += rhs.z_;
 
-    lhs.len2_ = lhs.CalculateLen2Vector();
+    lhs.len_ = NAN;
 
     return lhs;
 }
@@ -37,7 +36,7 @@ Vector& operator -= (Vector& lhs, const Vector& rhs) {
     lhs.y_ -= rhs.y_;
     lhs.z_ -= rhs.z_;
 
-    lhs.len2_ = lhs.CalculateLen2Vector();
+    lhs.len_ = NAN;
 
     return lhs;
 }
@@ -50,12 +49,12 @@ Vector& operator - (Vector& rhs) {
     return rhs;
 }
 
-Vector  operator * (const float multiplier, const Vector& rhs) {
+Vector operator * (const float multiplier, const Vector& rhs) {
     Vector res = rhs;
     return res *= multiplier;
 }
 
-Vector  operator * (const Vector& lhs, const float multiplier) {
+Vector operator * (const Vector& lhs, const float multiplier) {
     Vector res = lhs;
     return res *= multiplier;
 }
@@ -65,7 +64,7 @@ Vector& operator *= (Vector& lhs, const float rhs) {
     lhs.y_ *= rhs;
     lhs.z_ *= rhs;
 
-    lhs.len2_ = lhs.CalculateLen2Vector();
+    lhs.len_ = NAN;
 
     return lhs;
 }
@@ -74,11 +73,27 @@ float operator * (const Vector& lhs, const Vector& rhs) {
     return lhs.x_ * rhs.x_ + lhs.y_ * rhs.y_ + lhs.z_ * rhs.z_;
 }
 
-float Vector::CalculateLen2Vector() {
-    return x_ * x_ + y_ * y_ + z_ * z_;
+float Vector::calculateLenVector() {
+    return sqrtf(x_ * x_ + y_ * y_ + z_ * z_);
 }
 
-void Vector::RotateVector(const float angle) {
+float Vector::getVectorLen() {
+    return (std::isnan(len_)) ? calculateLenVector() : len_;
+}
+
+Vector& Vector::normalizeVector() {
+    float len = getVectorLen();
+
+    x_ /= len;
+    y_ /= len;
+    z_ /= len;
+
+    len_ = NAN;
+
+    return *this;
+}
+
+Vector& Vector::rotateVector(const float angle) {
     float x = x_;
     float y = y_;
     float cosF = cosf(angle);
@@ -87,10 +102,12 @@ void Vector::RotateVector(const float angle) {
     x_ = x * cosF - y * sinF;
     y_ = x * sinF + y * cosF;
 
-    len2_ = CalculateLen2Vector();
+    len_ = NAN;
+
+    return *this;
 }
 
-void Vector::ResizeVector(const CoordinateSystem& coordinateSystem, const int xGlobal, const int yGlobal) {
+Vector& Vector::resizeVector(const CoordinateSystem& coordinateSystem, const int xGlobal, const int yGlobal) {
     float xCentre = coordinateSystem.xLeftUp_ + coordinateSystem.weight_ / 2;
     float yCentre = coordinateSystem.yLeftUp_ + coordinateSystem.hight_  / 2;
 
@@ -105,20 +122,22 @@ void Vector::ResizeVector(const CoordinateSystem& coordinateSystem, const int xG
     if (y_ < coordinateSystem.yMin_) { y_ = coordinateSystem.yMin_; }
     if (y_ > coordinateSystem.yMax_) { y_ = coordinateSystem.yMax_; }
 
-    len2_ = CalculateLen2Vector();
+    len_ = NAN;
+
+    return *this;
 }
 
-void Vector::CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const {
+void Vector::createTringleForVector(sf::ConvexShape& convex, CoordinateSystem& coordinateSystem) const {
     const float heightTriangle   = 20;
     const float halfSideTriangle = (heightTriangle) / 5;
 
     const float precision = 1e-6f;
 
     float x1Global_ = 0, y1Global_ = 0;
-    coordinateSystem.ConvertLocalToGlobalVectorCoordinate(0, 0, x1Global_, y1Global_);
+    coordinateSystem.convertLocalToGlobalVectorCoordinate(0, 0, x1Global_, y1Global_);
 
     float x2Global_ = 0, y2Global_ = 0;
-    coordinateSystem.ConvertLocalToGlobalVectorCoordinate(x_, y_, x2Global_, y2Global_);
+    coordinateSystem.convertLocalToGlobalVectorCoordinate(x_, y_, x2Global_, y2Global_);
 
     float x0Global = 0, y0Global = 0;
     float x1Global = 0, y1Global = 0;
@@ -185,12 +204,12 @@ void Vector::CreateTringleForVector(sf::ConvexShape& convex, CoordinateSystem& c
     convex.setFillColor(sf::Color::Black);
 }
 
-void Vector::Draw(sf::RenderWindow& window, CoordinateSystem& coordinateSystem) const {
+void Vector::draw(sf::RenderWindow& window, CoordinateSystem& coordinateSystem) const {
     float x1Global = 0, y1Global = 0;
-    coordinateSystem.ConvertLocalToGlobalVectorCoordinate(0, 0, x1Global, y1Global);
+    coordinateSystem.convertLocalToGlobalVectorCoordinate(0, 0, x1Global, y1Global);
     
     float x2Global = 0, y2Global = 0;
-    coordinateSystem.ConvertLocalToGlobalVectorCoordinate(x_, y_, x2Global, y2Global);
+    coordinateSystem.convertLocalToGlobalVectorCoordinate(x_, y_, x2Global, y2Global);
     
     sf::Vertex vector[] =
     {
@@ -199,7 +218,7 @@ void Vector::Draw(sf::RenderWindow& window, CoordinateSystem& coordinateSystem) 
     };
 
     sf::ConvexShape convex;
-    CreateTringleForVector(convex, coordinateSystem);
+    createTringleForVector(convex, coordinateSystem);
 
     window.draw(vector, 2, sf::Lines);
     window.draw(convex);

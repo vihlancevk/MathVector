@@ -13,13 +13,13 @@ CoordinateSystem::CoordinateSystem(float weight, float hight,
     yMax_(yMax)
     {}
 
-void CoordinateSystem::ConvertLocalToGlobalVectorCoordinate(float xLocal, float yLocal,
+void CoordinateSystem::convertLocalToGlobalVectorCoordinate(float xLocal, float yLocal,
                                                             float& xGlobal, float& yGlobal) const {
     xGlobal = xLeftUp_ + (weight_ / (xMax_ - xMin_)) * (xLocal - xMin_);
     yGlobal = yLeftUp_ - (hight_  / (yMax_ - yMin_)) * (yLocal + yMin_);
 }
 
-void CoordinateSystem::Draw(sf::RenderWindow& window) const {
+void CoordinateSystem::draw(sf::RenderWindow& window) const {
     const float pointSize = 4;
 
     const float xCentre = xLeftUp_ + weight_ / 2;
